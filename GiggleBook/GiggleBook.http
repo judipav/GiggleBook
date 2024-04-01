@@ -1,0 +1,6 @@
+@GiggleBook_HostAddress = http://localhost:5231
+
+GET {{GiggleBook_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
