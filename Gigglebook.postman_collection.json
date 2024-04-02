@@ -1,0 +1,117 @@
+{
+	"info": {
+		"_postman_id": "eab83302-919f-4670-a364-a6a1ac16e433",
+		"name": "Gigglebook",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "8034432"
+	},
+	"item": [
+		{
+			"name": "RegisterUser",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"userName\": \"Pluto\",\r\n  \"password\": \"sugarbone\",\r\n  \"firstName\": \"Плуто\",\r\n  \"secondName\": \"Пес\",\r\n  \"birthDate\": \"2020-04-02T06:10:49.421Z\",\r\n  \"biography\": \"Заборы, кусты, кошик\",\r\n  \"city\": \"Саратов\",\r\n  \"sex\": \"M\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5090/User/Register",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5090",
+					"path": [
+						"User",
+						"Register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login(cookies)",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"userName\": \"Pluto\",\r\n  \"password\": \"sugarbone\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5090/Auth/Login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5090",
+					"path": [
+						"Auth",
+						"Login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "SearchUser",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"firstName\": \"ave\",\r\n  \"secondName\": \"din\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5090/User/Search",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5090",
+					"path": [
+						"User",
+						"Search"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "New Request",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5090/Auth/Logout",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5090",
+					"path": [
+						"Auth",
+						"Logout"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
