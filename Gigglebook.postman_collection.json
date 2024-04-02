@@ -94,7 +94,7 @@
 			"response": []
 		},
 		{
-			"name": "New Request",
+			"name": "Logout",
 			"request": {
 				"method": "GET",
 				"header": [],
@@ -108,6 +108,27 @@
 					"path": [
 						"Auth",
 						"Logout"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetUser",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5090/User/Get/2f468a18-515d-4783-8763-0b79928d0473",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5090",
+					"path": [
+						"User",
+						"Get",
+						"2f468a18-515d-4783-8763-0b79928d0473"
 					]
 				}
 			},
