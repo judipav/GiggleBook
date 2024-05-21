@@ -1,5 +1,6 @@
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
+using GiggleBook.Initialize;
 using GiggleBook.Interfaces;
 using GiggleBook.Services;
 using GiggleBook.Services.ServiceException;
@@ -68,6 +69,8 @@ var currentAssemblyXmlDoc = Path.Combine(
 
 builder.Services.Configure<RepositoryConfiguration>(builder.Configuration.GetSection(RepositoryConfiguration.PathConfiguration));
 builder.Services.AddSingleton<IRepository, RepositoryService>();
+
+builder.Services.AddHostedService<FillDbHostedService>();
 
 builder.Services.AddSwaggerGen(swagger =>
 {

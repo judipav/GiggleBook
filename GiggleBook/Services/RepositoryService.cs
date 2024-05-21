@@ -153,7 +153,7 @@ public class RepositoryService : IRepository
 
     }
 
-    public async Task<bool> RegisterUserAsync(User user, string password)
+    public async Task<User> RegisterUserAsync(User user, string password)
     {
         using var connection = new NpgsqlConnection(_connectionString);
         connection.Open();
@@ -172,12 +172,12 @@ public class RepositoryService : IRepository
 
         try
         {
-            var response = await command.ExecuteScalarAsync();
+            var response = await command.ExecuteReaderAsync();
 
-            if (response != null && response is bool)
-                return (bool)response;
+            if (response.Read() && Guid.TryParse(response[0].ToString(), out Guid userId) )
+                return await GetUserAsync(userId.ToString());
 
-            return false;
+            throw new CommonServiceException(152, "Не удалось зарегистрировать пользователя");
         }
         catch (NpgsqlException ex)
         {

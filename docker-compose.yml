@@ -18,6 +18,9 @@ services:
   postgres_image:
     image: postgres:15
     restart: always
+    build: 
+      context: .
+      dockerfile: ./Docker_pg
     ports:
       - 5437:5432
     environment:
