@@ -1,0 +1,57 @@
+services:
+  slave1:
+    image: postgres:15
+    restart: unless-stopped
+    container_name: slave1
+    build: 
+      context: .
+      dockerfile: ./DbCluster/Slave
+    ports:
+      - 15437:5432
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    command: 
+      -c config_file=/etc/postgresql.conf
+      -c hba_file=/etc/pg_hba.conf
+    volumes:
+      - ./DbCluster/Volumes/slave1:/var/lib/postgresql/data
+      - ./DbCluster/Volumes/slave1_postgresql.conf:/etc/postgresql.conf
+      - ./DbCluster/Volumes/slave1_pg_hba.conf:/etc/pg_hba.conf
+      #- ./GiggleBook/InitializeSlave:/docker-entrypoint-initdb.d
+      - ./DbCluster/standby.signal:/var/lib/postgres/data/standby.signal
+    networks:
+      - hw03
+
+  slave2:
+    image: postgres:15
+    restart: unless-stopped
+    container_name: slave2
+    build: 
+      context: .
+      dockerfile: ./DbCluster/Slave
+    ports:
+      - 25437:5432
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    command: 
+      -c config_file=/etc/postgresql.conf
+      -c hba_file=/etc/pg_hba.conf
+    volumes:
+      - ./DbCluster/Volumes/slave2:/var/lib/postgresql/data
+      - ./DbCluster/Volumes/slave2_postgresql.conf:/etc/postgresql.conf
+      - ./DbCluster/Volumes/slave2_pg_hba.conf:/etc/pg_hba.conf
+      #- ./GiggleBook/InitializeSlave:/docker-entrypoint-initdb.d
+      - ./DbCluster/standby.signal:/var/lib/postgres/data/standby.signal
+    networks:
+      - hw03
+
+networks:
+  hw03:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.32.0.0/16

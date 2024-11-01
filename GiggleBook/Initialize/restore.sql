@@ -420,7 +420,7 @@ ALTER TABLE public.cnt OWNER TO postgres;
 
 COPY public."DialogMessage" ("from", "to", text, datesend) FROM stdin;
 \.
-COPY public."DialogMessage" ("from", "to", text, datesend) FROM '/docker-entrypoint-initdb.d/3390.dat';
+COPY public."DialogMessage" ("from", "to", text, datesend) FROM '/var/lib/postgresql/restore/3390.dat';
 
 --
 -- Data for Name: Friends; Type: TABLE DATA; Schema: public; Owner: postgres
@@ -428,7 +428,7 @@ COPY public."DialogMessage" ("from", "to", text, datesend) FROM '/docker-entrypo
 
 COPY public."Friends" (user_id, friend_id) FROM stdin;
 \.
-COPY public."Friends" (user_id, friend_id) FROM '/docker-entrypoint-initdb.d/3391.dat';
+COPY public."Friends" (user_id, friend_id) FROM '/var/lib/postgresql/restore/3391.dat';
 
 --
 -- Data for Name: Post; Type: TABLE DATA; Schema: public; Owner: postgres
@@ -436,7 +436,7 @@ COPY public."Friends" (user_id, friend_id) FROM '/docker-entrypoint-initdb.d/339
 
 COPY public."Post" (id, text, author_user_id) FROM stdin;
 \.
-COPY public."Post" (id, text, author_user_id) FROM '/docker-entrypoint-initdb.d/3392.dat';
+COPY public."Post" (id, text, author_user_id) FROM '/var/lib/postgresql/restore/3392.dat';
 
 --
 -- Data for Name: User; Type: TABLE DATA; Schema: public; Owner: postgres
@@ -444,7 +444,7 @@ COPY public."Post" (id, text, author_user_id) FROM '/docker-entrypoint-initdb.d/
 
 COPY public."User" (id, first_name, second_name, birthdate, biography, city, password, username, sex) FROM stdin;
 \.
-COPY public."User" (id, first_name, second_name, birthdate, biography, city, password, username, sex) FROM '/docker-entrypoint-initdb.d/3393.dat';
+COPY public."User" (id, first_name, second_name, birthdate, biography, city, password, username, sex) FROM '/var/lib/postgresql/restore/3393.dat';
 
 --
 -- Data for Name: cnt; Type: TABLE DATA; Schema: public; Owner: postgres
@@ -452,7 +452,7 @@ COPY public."User" (id, first_name, second_name, birthdate, biography, city, pas
 
 COPY public.cnt (count) FROM stdin;
 \.
-COPY public.cnt (count) FROM '/docker-entrypoint-initdb.d/3394.dat';
+COPY public.cnt (count) FROM '/var/lib/postgresql/restore/3394.dat';
 
 --
 -- Name: Friends friends_user_id_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
