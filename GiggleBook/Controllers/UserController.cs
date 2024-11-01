@@ -22,30 +22,21 @@ public class UserController : ControllerBase
 
     [AllowAnonymous]
     [HttpPost]
-    public async Task<IActionResult> Register([FromBody] RegisterUserRequest registerUserRequest)
+    public async Task<IActionResult> Register([FromBody] RegisterUserRequest registerUserRequest) => Ok(await _userRepository.RegisterUserAsync(new User
     {
-        return Ok(await _userRepository.RegisterUserAsync(new User
-        {
-            FirstName = registerUserRequest.FirstName,
-            SecondName = registerUserRequest.SecondName,
-            BirthDate = registerUserRequest.BirthDate,
-            Biography = registerUserRequest.Biography,
-            City = registerUserRequest.City,
-            UserName = registerUserRequest.UserName,
-            Sex = registerUserRequest.Sex
-        }, 
+        FirstName = registerUserRequest.FirstName,
+        SecondName = registerUserRequest.SecondName,
+        BirthDate = registerUserRequest.BirthDate,
+        Biography = registerUserRequest.Biography,
+        City = registerUserRequest.City,
+        UserName = registerUserRequest.UserName,
+        Sex = registerUserRequest.Sex
+    },
         registerUserRequest.Password));
-    }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> Get(string id)
-    {
-        return Ok(await _userRepository.GetUserAsync(id));
-    }
+    public async Task<IActionResult> Get(string id) => Ok(await _userRepository.GetUserAsync(id));
 
     [HttpPost]
-    public IActionResult Search([FromBody] FindUserRequest request)
-    {
-        return Ok(_userRepository.FindUser(request.FirstName, request.SecondName));
-    }
+    public IActionResult Search([FromBody] FindUserRequest request) => Ok(_userRepository.FindUser(request.FirstName, request.SecondName));
 }

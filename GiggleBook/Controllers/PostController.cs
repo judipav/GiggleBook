@@ -11,26 +11,14 @@ namespace GiggleBook.Controllers;
 public class PostController : ControllerBase
 {
     [HttpPost("create")]
-    public IActionResult Create([FromBody] string[] text)
-    {
-        return Ok();
-    }
+    public IActionResult Create([FromBody] string[] text) => Ok();
 
     [HttpPut("update")]
-    public IActionResult Update([FromBody] Post post)
-    {
-        return Ok();
-    }
+    public IActionResult Update([FromBody] Post post) => Ok();
 
     [HttpPut("delete/{id}")]
-    public IActionResult Delete(Guid id)
-    {
-        return Ok();
-    }
+    public IActionResult Delete(Guid id) => Ok();
 
     [HttpGet("get/{id}")]
-    public IActionResult Get(Guid id)
-    {
-        return Ok();
-    }
+    public IActionResult Get(Guid id) => Ok();
 }

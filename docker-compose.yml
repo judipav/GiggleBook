@@ -4,6 +4,7 @@ services:
     build:
       context: .
       dockerfile: GiggleBook/Dockerfile
+    container_name: GiggleBook
     environment:
       DB_HOST: "master"
     ports:

@@ -22,7 +22,7 @@ public class RepositoryService : IRepository
         {
             _configuration.Host = dbHost;
         }
-        _connectionString = $"Host={_configuration.Host};Username={_configuration.User};Password={_configuration.Password};Database={_configuration.Database}";
+        _connectionString = $"Host={_configuration.Host};Port={_configuration.Port};Username={_configuration.User};Password={_configuration.Password};Database={_configuration.Database}";
     }
 
     public async Task<User> AuthUserAsync(string name, string token)

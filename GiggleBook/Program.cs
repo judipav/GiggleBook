@@ -63,7 +63,7 @@ builder.Services.AddDateOnlyTimeOnlyStringConverters();
 builder.Services.AddEndpointsApiExplorer();
 
 var currentAssemblyXmlDoc = Path.Combine(
-        Path.GetDirectoryName(AppContext.BaseDirectory) ?? throw new Exception("Отсутствует файл документации"),
+        Path.GetDirectoryName(AppContext.BaseDirectory) ?? throw new Exception("РћС‚СЃСѓС‚СЃС‚РІСѓРµС‚ С„Р°Р№Р» РґРѕРєСѓРјРµРЅС‚Р°С†РёРё"),
         $"{Assembly.GetExecutingAssembly().GetName().Name}.xml"
     );
 
@@ -101,7 +101,7 @@ app.UseExceptionHandler(e =>
         {
             var details = new ProblemDetails
             {
-                Title = $"Возникла ошибка. [ {errorType.GetType().Name} ]",
+                Title = $"Р’РѕР·РЅРёРєР»Р° РѕС€РёР±РєР°. [ {errorType.GetType().Name} ]",
             };
                         
             if (errorType is CommonServiceException typedError)

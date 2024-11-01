@@ -9,14 +9,8 @@ namespace GiggleBook.Controllers;
 public class FriendController : ControllerBase
 {
     [HttpPut("{user_id}")]
-    public IActionResult Set(string user_id)
-    {
-        return Ok();
-    }
+    public IActionResult Set(string user_id) => Ok();
 
     [HttpPut("{user_id}")]
-    public IActionResult Delete(string user_id)
-    {
-        return Ok();
-    }
+    public IActionResult Delete(string user_id) => Ok();
 }

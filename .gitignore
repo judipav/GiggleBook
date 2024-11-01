@@ -396,4 +396,8 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
-/GiggleBook/Initialize/3393.dat
+.DS_Store
+#/GiggleBook/Initialize/3393.dat
+DbCluster/Volumes/master/
+DbCluster/Volumes/slave1/
+DbCluster/Volumes/slave2/
