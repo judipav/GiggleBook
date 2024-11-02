@@ -11,23 +11,37 @@ namespace GiggleBook.Services;
 public class RepositoryService : IRepository
 {
     private readonly RepositoryConfiguration _configuration;
-    private readonly string _connectionString;
+    private readonly ILogger<RepositoryService> _logger;
+    private readonly string _writeConnectionString;
+    private readonly string _readonlyConnectionString;
 
-    public RepositoryService(IOptions<RepositoryConfiguration> options)
+    public RepositoryService(IOptions<RepositoryConfiguration> options, ILogger<RepositoryService> logger)
     {
         _configuration = options.Value;
+        _logger = logger;
 
-        var dbHost = Environment.GetEnvironmentVariable("DB_HOST");
-        if (!string.IsNullOrEmpty(dbHost))
+        var dbWrite = Environment.GetEnvironmentVariable("DB_RW_HOST");
+        if (!string.IsNullOrEmpty(dbWrite))
         {
-            _configuration.Host = dbHost;
+            _logger.LogInformation($"Обнаружена переменная окружения [DB_RW_HOST] {dbWrite}");
+
+            _configuration.Write.Host = dbWrite;
         }
-        _connectionString = $"Host={_configuration.Host};Port={_configuration.Port};Username={_configuration.User};Password={_configuration.Password};Database={_configuration.Database}";
+
+        var dbReadOnly = Environment.GetEnvironmentVariable("DB_RO_HOST");
+        if (!string.IsNullOrEmpty(dbReadOnly))
+        {
+            _logger.LogInformation($"Обнаружена переменная окружения [DB_RO_HOST] {dbReadOnly}");
+            _configuration.Write.Host = dbReadOnly;
+        }
+
+        _writeConnectionString = $"Host={_configuration.Write.Host};Port={_configuration.Write.Port};Username={_configuration.Write.User};Password={_configuration.Write.Password};Database={_configuration.Write.Database}";
+        _readonlyConnectionString = $"Host={_configuration.Readonly.Host};Port={_configuration.Readonly.Port};Username={_configuration.Readonly.User};Password={_configuration.Readonly.Password};Database={_configuration.Readonly.Database}";
     }
 
     public async Task<User> AuthUserAsync(string name, string token)
     {
-        using var connection = new NpgsqlConnection(_connectionString);
+        using var connection = new NpgsqlConnection(_writeConnectionString);
         connection.Open();
 
         using var command = connection.CreateCommand();
@@ -69,7 +83,7 @@ public class RepositoryService : IRepository
 
     public UserDto[] FindUser(string firstName, string secondName)
     {
-        using NpgsqlConnection connection = new NpgsqlConnection(_connectionString);
+        using NpgsqlConnection connection = new NpgsqlConnection(_readonlyConnectionString);
         connection.Open();
 
         using NpgsqlCommand command = connection.CreateCommand();
@@ -110,7 +124,7 @@ public class RepositoryService : IRepository
 
     public async Task<User> GetUserAsync(string id)
     {
-        using var connection = new NpgsqlConnection(_connectionString);
+        using var connection = new NpgsqlConnection(_readonlyConnectionString);
         connection.Open();
 
         using var command = connection.CreateCommand();
@@ -155,7 +169,7 @@ public class RepositoryService : IRepository
 
     public async Task<User> RegisterUserAsync(User user, string password)
     {
-        using var connection = new NpgsqlConnection(_connectionString);
+        using var connection = new NpgsqlConnection(_writeConnectionString);
         connection.Open();
 
         using var command = connection.CreateCommand();

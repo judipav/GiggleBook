@@ -3,6 +3,12 @@
 public class RepositoryConfiguration
 {
     public const string PathConfiguration = "Postgres";
+    public PostgresConfig Write { get; set; } = default!;
+    public PostgresConfig Readonly { get; set; } = default!;
+}
+
+public class PostgresConfig
+{
     public required string Host {  get; set; }
     public required string Port { get; set; }
     public required string Database {  get; set; }

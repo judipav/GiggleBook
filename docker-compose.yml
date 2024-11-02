@@ -6,7 +6,8 @@ services:
       dockerfile: GiggleBook/Dockerfile
     container_name: GiggleBook
     environment:
-      DB_HOST: "master"
+      DB_RW_HOST: "master"
+      DB_RO_HOST: "slave1"
     ports:
       - 5090:8080
     depends_on:

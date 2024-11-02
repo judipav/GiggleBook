@@ -22,9 +22,9 @@ public class FillDbHostedService : IHostedService
         var dbHost = Environment.GetEnvironmentVariable("DB_HOST");
         if (!string.IsNullOrEmpty(dbHost))
         {
-            _configuration.Host = dbHost;
+            _configuration.Write.Host = dbHost;
         }
-        _connectionString = $"Host={_configuration.Host};Username={_configuration.User};Password={_configuration.Password};Database={_configuration.Database}";
+        _connectionString = $"Host={_configuration.Write.Host};Port={_configuration.Write.Port};Username={_configuration.Write.User};Password={_configuration.Write.Password};Database={_configuration.Write.Database}";
     }
 
     public Task StartAsync(CancellationToken cancellationToken)
