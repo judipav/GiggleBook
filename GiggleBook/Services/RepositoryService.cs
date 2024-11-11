@@ -32,11 +32,12 @@ public class RepositoryService : IRepository
         if (!string.IsNullOrEmpty(dbReadOnly))
         {
             _logger.LogInformation($"Обнаружена переменная окружения [DB_RO_HOST] {dbReadOnly}");
-            _configuration.Write.Host = dbReadOnly;
+            _configuration.Write.Host = dbWrite;
         }
 
         _writeConnectionString = $"Host={_configuration.Write.Host};Port={_configuration.Write.Port};Username={_configuration.Write.User};Password={_configuration.Write.Password};Database={_configuration.Write.Database}";
-        _readonlyConnectionString = $"Host={_configuration.Readonly.Host};Port={_configuration.Readonly.Port};Username={_configuration.Readonly.User};Password={_configuration.Readonly.Password};Database={_configuration.Readonly.Database}";
+        _readonlyConnectionString = _configuration.Cqrs ? $"Host={_configuration.Readonly.Host};Port={_configuration.Readonly.Port};Username={_configuration.Readonly.User};Password={_configuration.Readonly.Password};Database={_configuration.Readonly.Database}" 
+            : _writeConnectionString;
     }
 
     public async Task<User> AuthUserAsync(string name, string token)

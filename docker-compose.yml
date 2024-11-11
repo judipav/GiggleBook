@@ -36,7 +36,6 @@ services:
       - ./DbCluster/Volumes/replica_backup:/mnt/replica_backup
       - ./DbCluster/Volumes/master_postgresql.conf:/etc/postgresql.conf
       - ./DbCluster/Volumes/master_pg_hba.conf:/etc/pg_hba.conf
-      # - ./GiggleBook/Initialize:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U replicator"]
       interval: 30s

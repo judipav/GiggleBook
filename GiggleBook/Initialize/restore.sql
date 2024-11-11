@@ -104,15 +104,37 @@ ALTER FUNCTION public.auth_user(user_name character, hash character) OWNER TO po
 -- Name: find_user(character varying, character varying); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
-CREATE FUNCTION public.find_user(user_fname character varying, user_sname character varying) RETURNS TABLE(id uuid, username character varying, first_name character varying, second_name character varying, birthdate date, biography character varying, city character varying, sex public.gender)
-    LANGUAGE plpgsql
-    AS $$
+CREATE OR REPLACE FUNCTION public.find_user(
+	user_fname character varying,
+	user_sname character varying)
+    RETURNS TABLE(id uuid, username character varying, first_name character varying, second_name character varying, birthdate date, biography character varying, city character varying, sex gender) 
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE PARALLEL UNSAFE
+    ROWS 1000
+
+AS $BODY$
 begin
 	return query 
 	select u.id, u.username, u.first_name, u.second_name, u.birthdate, u.biography, u.city, u.sex from "User" u
-		where 	to_tsvector('russian', u.first_name) @@ to_tsquery('user_fname') 
-			AND to_tsvector('russian', u.second_name) @@ to_tsquery('user_sname')
-		order by id;
+		where 	to_tsvector('russian', u.first_name) @@ to_tsquery(user_fname || ':*'::varchar) 
+			AND to_tsvector('russian', u.second_name) @@ to_tsquery(user_sname || ':*'::varchar)
+	union all
+	select u.id, u.username, u.first_name, u.second_name, u.birthdate, u.biography, u.city, u.sex from "User" u
+		where 	to_tsvector('russian', u.second_name) @@ to_tsquery(user_fname || ':*'::varchar) 
+			AND to_tsvector('russian', u.first_name) @@ to_tsquery(user_sname || ':*'::varchar)
+	union all
+	select u.id, u.username, u.first_name, u.second_name, u.birthdate, u.biography, u.city, u.sex from "User" u
+		where u.first_name = user_fname
+		and u.second_name = user_sname
+	union all
+	select u.id, u.username, u.first_name, u.second_name, u.birthdate, u.biography, u.city, u.sex from "User" u
+		where to_tsvector('russian', u.first_name) @@ to_tsquery(user_fname || ':*'::varchar) 
+		and u.second_name = user_sname
+	union all
+	select u.id, u.username, u.first_name, u.second_name, u.birthdate, u.biography, u.city, u.sex from "User" u
+		where u.first_name = user_fname
+		and to_tsvector('russian', u.second_name) @@ to_tsquery(user_sname || ':*'::varchar);
 end;
 $$;
 
@@ -530,3 +552,10 @@ ALTER TABLE ONLY public."Post"
 -- PostgreSQL database dump complete
 --
 
+CREATE INDEX IF NOT EXISTS idx_tsvector_username
+	ON public."User"
+	USING gin  (to_tsvector('russian'::regconfig, first_name::text),
+				to_tsvector('russian'::regconfig, second_name::text));
+
+CREATE INDEX IF NOT EXISTS idx_exact_username
+	ON public."User"(first_name, second_name);
