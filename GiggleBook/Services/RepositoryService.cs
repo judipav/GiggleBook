@@ -2,7 +2,6 @@
 using GiggleBook.Interfaces;
 using GiggleBook.Services.ServiceException;
 using GiggleBook.Utilities;
-using Microsoft.Extensions.Options;
 using Npgsql;
 using System.Data;
 
@@ -22,7 +21,7 @@ public class RepositoryService : IRepository
     {
         using var connection = _routingDataSource.GetConnection();
         using var command = connection.CreateCommand();
-        command.CommandType = System.Data.CommandType.Text;
+        command.CommandType = CommandType.Text;
         command.Parameters.AddWithValue("name", name);
         command.Parameters.AddWithValue("token", token);
         command.CommandText = $"select * from auth_user(:name, :token)";
