@@ -5,7 +5,7 @@ public class RepositoryConfiguration
     public const string PathConfiguration = "Postgres";
     public bool Cqrs { get; set; }
     public PostgresConfig Write { get; set; } = default!;
-    public PostgresConfig Readonly { get; set; } = default!;
+    public PostgresConfig[] Readonly { get; set; } = default!;
 }
 
 public class PostgresConfig
