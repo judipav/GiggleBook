@@ -10,3 +10,4 @@ public interface ISessionStoreService
     void Drop(Session session);
     void Refresh(string sessionId);
 }
+

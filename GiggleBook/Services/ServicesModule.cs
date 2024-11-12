@@ -14,5 +14,7 @@ public class ServicesModule : Module
         builder.RegisterType<AuthenticationManager>().AsSelf().AsImplementedInterfaces();
 
         builder.RegisterType<ReplicationRoutingDataSource>().AsSelf().AsImplementedInterfaces();
+
+        builder.RegisterType<GlobalVariables>().AsSelf().AsImplementedInterfaces().SingleInstance();
     }
 }

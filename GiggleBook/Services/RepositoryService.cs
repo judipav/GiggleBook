@@ -2,6 +2,7 @@
 using GiggleBook.Interfaces;
 using GiggleBook.Services.ServiceException;
 using GiggleBook.Utilities;
+using Microsoft.Extensions.Options;
 using Npgsql;
 using System.Data;
 
@@ -11,20 +12,20 @@ public class RepositoryService : IRepository
 {
     private readonly IReplicationRoutingDataSource _routingDataSource;
 
-    public RepositoryService(IReplicationRoutingDataSource routingDataSource)
+    public RepositoryService(IReplicationRoutingDataSource dataSource)
     {
-        _routingDataSource = routingDataSource;
+        _routingDataSource = dataSource;
     }
 
+    [ReplicaReadOnly]
     public async Task<User> AuthUserAsync(string name, string token)
     {
-        string commandText = $"select * from auth_user(:name, :token)";
-        using var connection = _routingDataSource.GetConnection(commandText);
+        using var connection = _routingDataSource.GetConnection();
         using var command = connection.CreateCommand();
         command.CommandType = System.Data.CommandType.Text;
         command.Parameters.AddWithValue("name", name);
         command.Parameters.AddWithValue("token", token);
-        command.CommandText = commandText;
+        command.CommandText = $"select * from auth_user(:name, :token)";
         
         try
         {
@@ -56,15 +57,15 @@ public class RepositoryService : IRepository
         }
     }
 
+    [ReplicaReadOnly]
     public UserDto[] FindUser(string firstName, string secondName)
     {
-        string commandText = $"select * from find_user(:fname, :sname)";
-        using var connection = _routingDataSource.GetConnection(commandText);
+        using var connection = _routingDataSource.GetConnection();
         using NpgsqlCommand command = connection.CreateCommand();
         command.CommandType = CommandType.Text;
         command.Parameters.AddWithValue("fname", firstName);
         command.Parameters.AddWithValue("sname", secondName);
-        command.CommandText = commandText;
+        command.CommandText = $"select * from find_user(:fname, :sname)";
 
         NpgsqlDataAdapter adapter = new NpgsqlDataAdapter(command);
         DataTable table = new DataTable();
@@ -92,14 +93,14 @@ public class RepositoryService : IRepository
         }
     }
 
+    [ReplicaReadOnly]
     public async Task<User> GetUserAsync(string id)
     {
-        string commandText = $"select * from get_user(:id)";
-        using var connection = _routingDataSource.GetConnection(commandText);
+        using var connection = _routingDataSource.GetConnection();
         using var command = connection.CreateCommand();
         command.CommandType = System.Data.CommandType.Text;
         command.Parameters.AddWithValue("id", Guid.Parse(id));
-        command.CommandText = commandText;
+        command.CommandText = $"select * from get_user(:id)";
                 
         var response = await command.ExecuteReaderAsync();
         try
@@ -135,10 +136,7 @@ public class RepositoryService : IRepository
 
     public async Task<User> RegisterUserAsync(User user, string password)
     {
-        string commandText = $"INSERT"; // я не знаю методов определения средствами ADO что делает хранимая процедура - пишет или читает
-                                        // поэтому укажем явно что будет происходить в этом методе 
-
-        using var connection = _routingDataSource.GetConnection(commandText);
+        using var connection = _routingDataSource.GetConnection();
         using var command = connection.CreateCommand();
         command.CommandType = System.Data.CommandType.Text;
         command.CommandText = "select * from register_user(:f_name, :s_name, :dt_birth, :bio, :city, :sword, :u_name, :u_sex)";

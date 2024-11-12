@@ -19,7 +19,6 @@ services:
       - ./DbCluster/Volumes/slave1:/var/lib/postgresql/data
       - ./DbCluster/Volumes/slave1_postgresql.conf:/etc/postgresql.conf
       - ./DbCluster/Volumes/slave1_pg_hba.conf:/etc/pg_hba.conf
-      #- ./GiggleBook/InitializeSlave:/docker-entrypoint-initdb.d
       - ./DbCluster/standby.signal:/var/lib/postgres/data/standby.signal
     networks:
       - hw03
@@ -44,7 +43,6 @@ services:
       - ./DbCluster/Volumes/slave2:/var/lib/postgresql/data
       - ./DbCluster/Volumes/slave2_postgresql.conf:/etc/postgresql.conf
       - ./DbCluster/Volumes/slave2_pg_hba.conf:/etc/pg_hba.conf
-      #- ./GiggleBook/InitializeSlave:/docker-entrypoint-initdb.d
       - ./DbCluster/standby.signal:/var/lib/postgres/data/standby.signal
     networks:
       - hw03
