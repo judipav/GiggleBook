@@ -4,6 +4,11 @@ using System.Diagnostics;
 using Microsoft.Extensions.Options;
 
 namespace GiggleBook.Services;
+
+public enum ConnectionType{
+    Write,
+    Readonly
+}
 public class ReplicationRoutingDataSource : IReplicationRoutingDataSource
 {
     private readonly string[] _slaves;
@@ -18,20 +23,22 @@ public class ReplicationRoutingDataSource : IReplicationRoutingDataSource
             : [_master];
     }
 
-    public NpgsqlConnection GetConnection() 
+    public NpgsqlConnection GetConnection(ConnectionType connectionType) 
     {
-        if (_configuration.Cqrs)
+        if (_configuration.Cqrs && connectionType == ConnectionType.Readonly)
         {
-            var st = new StackTrace();
-            for (int i = 1; i < st.FrameCount; i++)
-            {
-                var frame = st.GetFrame(i);
-                var method = frame?.GetMethod();
-                if (method != null && method.GetCustomAttributes(typeof(ReplicaReadOnlyAttribute), false).Any())
-                {
-                    return CreateConnection(_slaves[Random.Shared.Next(0, _slaves.Length)]);;
-                }
-            }
+            return CreateConnection(_slaves[Random.Shared.Next(0, _slaves.Length)]);;
+
+            // var st = new StackTrace();
+            // for (int i = 1; i < st.FrameCount; i++)
+            // {
+            //     var frame = st.GetFrame(i);
+            //     var method = frame?.GetMethod();
+            //     if (method != null && method.GetCustomAttributes(typeof(ReplicaReadOnlyAttribute), false).Any())
+            //     {
+                    
+            //     }
+            // }
         }
         
         return CreateConnection(_master);

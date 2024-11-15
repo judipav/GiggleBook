@@ -16,10 +16,9 @@ public class RepositoryService : IRepository
         _routingDataSource = dataSource;
     }
 
-    [ReplicaReadOnly]
     public async Task<User> AuthUserAsync(string name, string token)
     {
-        using var connection = _routingDataSource.GetConnection();
+        using var connection = _routingDataSource.GetConnection(ConnectionType.Readonly);
         using var command = connection.CreateCommand();
         command.CommandType = CommandType.Text;
         command.Parameters.AddWithValue("name", name);
@@ -56,10 +55,9 @@ public class RepositoryService : IRepository
         }
     }
 
-    [ReplicaReadOnly]
     public UserDto[] FindUser(string firstName, string secondName)
     {
-        using var connection = _routingDataSource.GetConnection();
+        using var connection = _routingDataSource.GetConnection(ConnectionType.Readonly);
         using NpgsqlCommand command = connection.CreateCommand();
         command.CommandType = CommandType.Text;
         command.Parameters.AddWithValue("fname", firstName);
@@ -92,10 +90,9 @@ public class RepositoryService : IRepository
         }
     }
 
-    [ReplicaReadOnly]
     public async Task<User> GetUserAsync(string id)
     {
-        using var connection = _routingDataSource.GetConnection();
+        using var connection = _routingDataSource.GetConnection(ConnectionType.Readonly);
         using var command = connection.CreateCommand();
         command.CommandType = System.Data.CommandType.Text;
         command.Parameters.AddWithValue("id", Guid.Parse(id));
@@ -135,7 +132,7 @@ public class RepositoryService : IRepository
 
     public async Task<User> RegisterUserAsync(User user, string password)
     {
-        using var connection = _routingDataSource.GetConnection();
+        using var connection = _routingDataSource.GetConnection(ConnectionType.Write);
         using var command = connection.CreateCommand();
         command.CommandType = System.Data.CommandType.Text;
         command.CommandText = "select * from register_user(:f_name, :s_name, :dt_birth, :bio, :city, :sword, :u_name, :u_sex)";
