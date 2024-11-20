@@ -6,6 +6,7 @@ using GiggleBook.Utilities;
 using Npgsql;
 using System.Data;
 using System.Diagnostics;
+using System.Net.Sockets;
 
 
 namespace GiggleBook.Services;
@@ -202,6 +203,11 @@ public class RepositoryService : IRepository
             activity?.SetStatus(ActivityStatusCode.Error);
             RepositoryServiceInstrumentation.FailedWritesCounter.Add(1);
             throw new CommonServiceException(ex.ErrorCode, ex.Message);
+        }
+        catch (Exception ex) {
+            activity?.SetStatus(ActivityStatusCode.Error);
+            RepositoryServiceInstrumentation.FailedWritesCounter.Add(1);
+            throw new CommonServiceException(501, ex.Message);
         }
         finally 
         {
