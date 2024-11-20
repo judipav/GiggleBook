@@ -283,26 +283,39 @@ ALTER FUNCTION public.post_update(post_id uuid, post_text text) OWNER TO postgre
 -- Name: register_user(character, character, date, character, character, character, character, character); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
-CREATE FUNCTION public.register_user(f_name character, s_name character, dt_birth date, bio character, city character, sword character, u_name character, u_sex character) RETURNS uuid
-    LANGUAGE plpgsql
-    AS $$
-declare w int;
-begin
-	select count(*) into w from "User" u
-		where u.username = u_name ;
-	
-	if w > 0 then 
-		RAISE EXCEPTION 'login уже существуе';
-	end if;
-	
-	INSERT INTO public."User"(
-	first_name, second_name, birthdate, biography, city, password, username, sex)
-	VALUES (f_name, s_name, dt_birth, bio, city, sword, u_name, u_sex)
-	RETURNING id INTO res;
-		
-	return res; 
-end;	
-$$;
+CREATE FUNCTION public.register_user(
+    f_name text,
+    s_name text,
+    dt_birth date,
+    bio text,
+    city text,
+    sword text,
+    u_name text,
+    u_sex text)
+    RETURNS uuid
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE PARALLEL UNSAFE
+AS $BODY$
+DECLARE 
+    w int;
+    res uuid;  -- Объявляем переменную res
+BEGIN
+    SELECT count(*) INTO w FROM "User" u
+    WHERE u.username = u_name;
+
+    IF w > 0 THEN 
+        RAISE EXCEPTION 'Логин уже существует';
+    END IF;
+
+    INSERT INTO public."User"(
+        first_name, second_name, birthdate, biography, city, password, username, sex)
+    VALUES (f_name, s_name, dt_birth, bio, city, sword, u_name, u_sex)
+    RETURNING id INTO res;
+
+    RETURN res; 
+END; 
+$BODY$;
 
 
 ALTER FUNCTION public.register_user(f_name character, s_name character, dt_birth date, bio character, city character, sword character, u_name character, u_sex character) OWNER TO postgres;

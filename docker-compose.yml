@@ -42,6 +42,30 @@ services:
     networks:
       - hw03
 
+  prometheus:
+    image: prom/prometheus
+    container_name: gb-prometheus
+    volumes:
+      - ./DbCluster/Volumes/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - '9090:9090'
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    networks:
+      - hw03
+
+  grafana:
+    image: grafana/grafana
+    container_name: gb-grafana
+    ports:
+      - '3000:3000'
+    depends_on:
+      - prometheus
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    networks:
+      - hw03
+
 networks:
   hw03:
     ipam:

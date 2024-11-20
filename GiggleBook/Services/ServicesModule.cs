@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using GiggleBook.Auth;
+using GiggleBook.Services.Instrumentation;
 
 namespace GiggleBook.Services;
 
@@ -14,5 +15,7 @@ public class ServicesModule : Module
         builder.RegisterType<AuthenticationManager>().AsSelf().AsImplementedInterfaces();
 
         builder.RegisterType<ReplicationRoutingDataSource>().AsSelf().AsImplementedInterfaces();
+
+        builder.RegisterType<RepositoryServiceInstrumentation>().AsSelf().SingleInstance();
     }
 }

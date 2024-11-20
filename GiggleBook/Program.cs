@@ -3,6 +3,7 @@ using Autofac.Extensions.DependencyInjection;
 using GiggleBook.Initialize;
 using GiggleBook.Interfaces;
 using GiggleBook.Services;
+using GiggleBook.Services.Instrumentation;
 using GiggleBook.Services.ServiceException;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Diagnostics;
@@ -11,6 +12,9 @@ using Microsoft.Extensions.Hosting.Systemd;
 using Microsoft.Extensions.Hosting.WindowsServices;
 using Microsoft.OpenApi.Models;
 using Npgsql;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions
@@ -87,6 +91,19 @@ builder.Services.AddSwaggerGen(swagger =>
     });
 });
 
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(r => r
+    .AddService(serviceName: "RepositoryService",
+    serviceInstanceId: Environment.MachineName))
+    .WithTracing(builder => {
+        builder.AddSource(RepositoryServiceInstrumentation.ActivitySourceName)
+            .SetSampler(new AlwaysOnSampler());
+    })
+    .WithMetrics(builder => {
+        builder.AddMeter(RepositoryServiceInstrumentation.MeterName);
+        builder.AddPrometheusExporter();
+    });
+
 var app = builder.Build();
 
 app.UseExceptionHandler(e =>
@@ -136,7 +153,7 @@ app.UseExceptionHandler(e =>
         }
     });
 });
-
+app.UseOpenTelemetryPrometheusScrapingEndpoint();
 app.UseSwagger();
 app.UseSwaggerUI();
 

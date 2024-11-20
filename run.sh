@@ -20,3 +20,5 @@ docker-compose -f docker-compose-slaves.yml up --detach
 docker cp ./GiggleBook/Initialize/. master:/var/lib/postgresql/restore/
 docker exec -it master bash -c "chown -R postgres:postgres /var/lib/postgresql/restore/*"
 docker exec -it master su - postgres -c "psql -U postgres -f /var/lib/postgresql/restore/restore.sql"
+
+curl -X POST http://admin:admin@localhost:3000/api/datasources -H "Content-Type: application/json" -d '{  "name": "Prometheus", "type": "prometheus", "url": "http://localhost:9090", "access": "proxy", "basicAuth": false, "jsonData": { "tlsSkipVerify": false } }'
