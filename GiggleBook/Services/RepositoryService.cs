@@ -188,25 +188,25 @@ public class RepositoryService : IRepository
 
             if (response.Read() && Guid.TryParse(response[0].ToString(), out Guid userId) )
             {
-                var addedUser = await GetUserAsync(userId.ToString());
+                user.Id = userId;
                 activity?.SetStatus(ActivityStatusCode.Ok);
-                RepositoryServiceInstrumentation.SuccessfulWritesCounter.Add(1);
-                return addedUser;
+                _instrumentation.SuccessfulWritesCounter.Add(1);
+                return user;
             }
 
             activity?.SetStatus(ActivityStatusCode.Error);
-            RepositoryServiceInstrumentation.FailedWritesCounter.Add(1);
+            _instrumentation.FailedWritesCounter.Add(1);
             throw new CommonServiceException(152, "Не удалось зарегистрировать пользователя");
         }
         catch (NpgsqlException ex)
         {
             activity?.SetStatus(ActivityStatusCode.Error);
-            RepositoryServiceInstrumentation.FailedWritesCounter.Add(1);
+            _instrumentation.FailedWritesCounter.Add(1);
             throw new CommonServiceException(ex.ErrorCode, ex.Message);
         }
         catch (Exception ex) {
             activity?.SetStatus(ActivityStatusCode.Error);
-            RepositoryServiceInstrumentation.FailedWritesCounter.Add(1);
+            _instrumentation.FailedWritesCounter.Add(1);
             throw new CommonServiceException(501, ex.Message);
         }
         finally 

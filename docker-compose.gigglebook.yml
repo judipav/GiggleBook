@@ -1,0 +1,18 @@
+services:
+  gigglebook:
+    image: ${DOCKER_REGISTRY-}gigglebook
+    build:
+      context: .
+      dockerfile: GiggleBook/Dockerfile
+    container_name: GiggleBook
+    ports:
+      - 5090:8080
+    networks:
+      - hw03
+
+networks:
+  hw03:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.32.0.0/16

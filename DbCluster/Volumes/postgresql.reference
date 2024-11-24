@@ -4,10 +4,11 @@ ssl = off
 shared_buffers = 128MB
 dynamic_shared_memory_type = posix
 wal_level = replica
+#log_min_messages = debug1
+hot_standby = on
 max_wal_size = 1GB
 min_wal_size = 80MB
 max_wal_senders = 4
-primary_conninfo = 'host=master port=5432 user=replicator password=pass application_name=slave2'			
 log_timezone = 'Etc/UTC'
 datestyle = 'iso, mdy'
 timezone = 'Etc/UTC'
@@ -17,4 +18,3 @@ lc_numeric = 'en_US.utf8'
 lc_time = 'en_US.utf8'
 default_text_search_config = 'pg_catalog.english'
 shared_preload_libraries = 'pg_stat_statements'
-hot_standby = on

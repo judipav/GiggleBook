@@ -318,7 +318,7 @@ END;
 $BODY$;
 
 
-ALTER FUNCTION public.register_user(f_name character, s_name character, dt_birth date, bio character, city character, sword character, u_name character, u_sex character) OWNER TO postgres;
+ALTER FUNCTION public.register_user(f_name text, s_name text, dt_birth date, bio text, city text, sword text, u_name text, u_sex text) OWNER TO postgres;
 
 --
 -- Name: remove_friend(uuid, uuid); Type: FUNCTION; Schema: public; Owner: postgres
@@ -427,7 +427,8 @@ CREATE TABLE public."User" (
     city character varying NOT NULL,
     password character varying NOT NULL,
     username character varying,
-    sex public.gender
+    sex public.gender,
+	created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP
 );
 
 
@@ -560,6 +561,9 @@ ALTER TABLE ONLY public."Post"
 -- PostgreSQL database dump complete
 --
 
+CREATE INDEX IF NOT EXISTS idx_user_created_at 
+	ON public."User" (created_at);
+
 CREATE INDEX IF NOT EXISTS idx_tsvector_username
 	ON public."User"
 	USING gin  (to_tsvector('russian'::regconfig, first_name::text),
@@ -567,3 +571,74 @@ CREATE INDEX IF NOT EXISTS idx_tsvector_username
 
 CREATE INDEX IF NOT EXISTS idx_exact_username
 	ON public."User"(first_name, second_name);
+
+--
+-- Postgres metrics
+--
+
+\connect postgres
+
+CREATE USER postgres_exporter WITH PASSWORD 'postgres_exporter';
+GRANT CONNECT ON DATABASE gigglebook TO postgres_exporter;
+GRANT CONNECT ON DATABASE postgres TO postgres_exporter;
+GRANT USAGE ON SCHEMA public TO postgres_exporter;
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO postgres_exporter;
+ALTER USER postgres_exporter SET SEARCH_PATH TO postgres_exporter,pg_catalog,public;
+GRANT pg_monitor to postgres_exporter;
+CREATE SCHEMA IF NOT EXISTS postgres_exporter;
+GRANT USAGE ON SCHEMA postgres_exporter TO postgres_exporter;
+
+-- Создание функции для получения pg_stat_activity
+CREATE OR REPLACE FUNCTION public.get_pg_stat_activity() 
+RETURNS SETOF pg_stat_activity AS
+$$ 
+SELECT * FROM pg_catalog.pg_stat_activity; 
+$$ 
+LANGUAGE sql
+VOLATILE
+SECURITY DEFINER;
+
+-- Создание представления для pg_stat_activity
+CREATE OR REPLACE VIEW postgres_exporter.pg_stat_activity AS
+SELECT * FROM public.get_pg_stat_activity();
+
+-- Предоставление прав на представление
+GRANT SELECT ON postgres_exporter.pg_stat_activity TO postgres_exporter;
+
+-- Создание функции для получения pg_stat_replication
+CREATE OR REPLACE FUNCTION public.get_pg_stat_replication() 
+RETURNS SETOF pg_stat_replication AS
+$$ 
+SELECT * FROM pg_stat_replication; 
+$$ 
+LANGUAGE sql
+VOLATILE
+SECURITY DEFINER;
+
+-- Создание представления для pg_stat_replication
+CREATE OR REPLACE VIEW postgres_exporter.pg_stat_replication AS
+SELECT * FROM public.get_pg_stat_replication();
+
+-- Предоставление прав на представление
+GRANT SELECT ON postgres_exporter.pg_stat_replication TO postgres_exporter;
+
+-- Убедитесь, что расширение pg_stat_statements установлено
+SET search_path TO public;
+CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
+
+-- Создание функции для получения pg_stat_statements
+CREATE OR REPLACE FUNCTION public.get_pg_stat_statements() 
+RETURNS SETOF pg_stat_statements AS
+$$ 
+SELECT * FROM pg_stat_statements; 
+$$ 
+LANGUAGE sql
+VOLATILE
+SECURITY DEFINER;
+
+-- Создание представления для pg_stat_statements
+CREATE OR REPLACE VIEW postgres_exporter.pg_stat_statements AS
+SELECT * FROM public.get_pg_stat_statements();
+
+-- Предоставление прав на представление
+GRANT SELECT ON postgres_exporter.pg_stat_statements TO postgres_exporter;

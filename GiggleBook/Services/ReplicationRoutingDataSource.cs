@@ -26,20 +26,7 @@ public class ReplicationRoutingDataSource : IReplicationRoutingDataSource
     public NpgsqlConnection GetConnection(ConnectionType connectionType) 
     {
         if (_configuration.Cqrs && connectionType == ConnectionType.Readonly)
-        {
-            return CreateConnection(_slaves[Random.Shared.Next(0, _slaves.Length)]);;
-
-            // var st = new StackTrace();
-            // for (int i = 1; i < st.FrameCount; i++)
-            // {
-            //     var frame = st.GetFrame(i);
-            //     var method = frame?.GetMethod();
-            //     if (method != null && method.GetCustomAttributes(typeof(ReplicaReadOnlyAttribute), false).Any())
-            //     {
-                    
-            //     }
-            // }
-        }
+            return CreateConnection(_slaves[Random.Shared.Next(0, _slaves.Length)]);
         
         return CreateConnection(_master);
     }
