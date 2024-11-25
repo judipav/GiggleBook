@@ -150,7 +150,10 @@ public class RepositoryService : IRepository
             var response = await command.ExecuteReaderAsync();
 
             if (response.Read() && Guid.TryParse(response[0].ToString(), out Guid userId) )
-                return await GetUserAsync(userId.ToString());
+            {
+                user.Id = userId;
+                return user;
+            }
 
             throw new CommonServiceException(152, "Не удалось зарегистрировать пользователя");
         }

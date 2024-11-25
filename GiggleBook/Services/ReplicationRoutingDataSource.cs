@@ -26,7 +26,6 @@ public class ReplicationRoutingDataSource : IReplicationRoutingDataSource
     public NpgsqlConnection GetConnection(ConnectionType connectionType) 
     {
         if (_configuration.Cqrs && connectionType == ConnectionType.Readonly)
-        {
             return CreateConnection(_slaves[Random.Shared.Next(0, _slaves.Length)]);;
 
             // var st = new StackTrace();
@@ -39,7 +38,7 @@ public class ReplicationRoutingDataSource : IReplicationRoutingDataSource
                     
             //     }
             // }
-        }
+        
         
         return CreateConnection(_master);
     }
