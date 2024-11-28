@@ -1,12 +1,3 @@
-apiVersion: 1
-
-providers:
-  - name: 'Prometheus'
-    orgId: 1
-    folder: ''
-    type: file
-    disableDeletion: false
-    editable: true
-    allowUiUpdates: true
-    options:
-      path: /etc/grafana/provisioning/dashboards
+version https://git-lfs.github.com/spec/v1
+oid sha256:8786c25db8528d2ced1aa02a131d36e6368bacdd901d4c141cb0e0822e027a28
+size 224

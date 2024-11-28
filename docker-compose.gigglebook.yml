@@ -1,18 +1,3 @@
-services:
-  gigglebook:
-    image: ${DOCKER_REGISTRY-}gigglebook
-    build:
-      context: .
-      dockerfile: GiggleBook/Dockerfile
-    container_name: GiggleBook
-    ports:
-      - 5090:8080
-    networks:
-      - hw03
-
-networks:
-  hw03:
-    ipam:
-      driver: default
-      config:
-        - subnet: 172.32.0.0/16
+version https://git-lfs.github.com/spec/v1
+oid sha256:62ca0b9abc13e3f5e551ed6e50a85cb3ce9a16d9ab90c2693ee2adb27280ea18
+size 316

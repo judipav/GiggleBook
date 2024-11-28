@@ -1,10 +1,3 @@
-SET statement_timeout = 0;
-SET lock_timeout = 0;
-SET idle_in_transaction_session_timeout = 0;
-SET client_encoding = 'UTF8';
-SET standard_conforming_strings = on;
-SELECT pg_catalog.set_config('search_path', '', false);
-SET check_function_bodies = false;
-SET xmloption = content;
-SET client_min_messages = warning;
-SET row_security = off;
+version https://git-lfs.github.com/spec/v1
+oid sha256:46cec569a0f5048123e660c97e2d7b54511705c27060fd7bcf1b9ea2319ec160
+size 337

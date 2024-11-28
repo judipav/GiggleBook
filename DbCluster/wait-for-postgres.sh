@@ -1,15 +1,3 @@
-#!/bin/bash
-# wait-for-postgres.sh
-
-set -e
-
-cmd="$@"
-timer="5"
-
-until runuser -l postgres -c 'pg_isready' 2>/dev/null; do
-  >&2 echo "Postgres is unavailable - sleeping for $timer seconds"
-  sleep $timer
-done
-
->&2 echo "Postgres is up - executing command"
-exec $cmd
+version https://git-lfs.github.com/spec/v1
+oid sha256:7104ff342f9461a786c68168249b18683234e9aa40fef5af78cf591917dab8b9
+size 265

@@ -1,25 +1,3 @@
-﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.5.002.0
-MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GiggleBook", "GiggleBook.csproj", "{8DFC7BE6-8F5A-436E-B6E1-C44A79B4CAA4}"
-EndProject
-Global
-	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
-		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{8DFC7BE6-8F5A-436E-B6E1-C44A79B4CAA4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8DFC7BE6-8F5A-436E-B6E1-C44A79B4CAA4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8DFC7BE6-8F5A-436E-B6E1-C44A79B4CAA4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8DFC7BE6-8F5A-436E-B6E1-C44A79B4CAA4}.Release|Any CPU.Build.0 = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {06E93B1C-BE3B-44E8-AAB2-9501DA4E6403}
-	EndGlobalSection
-EndGlobal
+version https://git-lfs.github.com/spec/v1
+oid sha256:28135b12db2fc8c69b9865de32ad664a6f07b0b924c45c50fd4a1be6217a3cad
+size 1096

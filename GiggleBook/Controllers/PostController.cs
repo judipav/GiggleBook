@@ -1,24 +1,3 @@
-﻿using GiggleBook.Auth;
-using GiggleBook.Dto;
-
-using Microsoft.AspNetCore.Mvc;
-
-namespace GiggleBook.Controllers;
-
-[ApiController]
-[Authorize]
-[Route("[controller]/[action]")]
-public class PostController : ControllerBase
-{
-    [HttpPost("create")]
-    public IActionResult Create([FromBody] string[] text) => Ok();
-
-    [HttpPut("update")]
-    public IActionResult Update([FromBody] Post post) => Ok();
-
-    [HttpPut("delete/{id}")]
-    public IActionResult Delete(Guid id) => Ok();
-
-    [HttpGet("get/{id}")]
-    public IActionResult Get(Guid id) => Ok();
-}
+version https://git-lfs.github.com/spec/v1
+oid sha256:e0c6bba7ec90d5578009333afb46a5046294a36c95b3d636e02a6d2402c9fc23
+size 1265

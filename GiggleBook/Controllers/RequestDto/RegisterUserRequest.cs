@@ -1,13 +1,3 @@
-﻿namespace GiggleBook.Controllers.RequestDto;
-
-public class RegisterUserRequest
-{
-    public required string UserName { get; set; }
-    public required string Password { get; set; }
-    public required string FirstName { get; set; }
-    public required string SecondName { get; set; }
-    public DateTime BirthDate { get; set; }
-    public required string Biography { get; set; }
-    public required string City { get; set; }
-    public char Sex { get; set; }
-}
+version https://git-lfs.github.com/spec/v1
+oid sha256:f4948a388f241edc22c8276699839cd9085e63b0da463ba0788d781eb608edec
+size 477
