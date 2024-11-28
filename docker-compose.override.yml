@@ -1,3 +1,7 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:1baa49e1211eca7c10c369275f849c7d4b0e9eb4432d8358bb55653085d63add
-size 156
+services:
+  gigglebook:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_HTTP_PORTS=8080
+    ports:
+      - "5090:8080"

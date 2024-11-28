@@ -1,3 +1,17 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:a203b0851904531228db7803b7333d9a4cb9b245da69ef9103a534ad9463da79
-size 430
+﻿using GiggleBook.Dto;
+using Microsoft.AspNetCore.Http.HttpResults;
+
+namespace GiggleBook.Data;
+
+public class Session
+{
+    public Session(User user)
+    {
+        Id = Guid.NewGuid();
+        User = user;
+    }
+    public Guid Id { get; init; }
+    public User User { get; set; }
+    public DateTime Created { get; init; } = DateTime.Now;
+    public DateTime BestBefore { get; set; } = DateTime.Now.AddHours(8);
+}

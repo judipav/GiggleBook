@@ -1,3 +1,22 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:338bd632d0e4e999e05f95eb15a1d20e30bf8d807c12bb10d105a016b8e0cd16
-size 730
+﻿using Autofac;
+using GiggleBook.Auth;
+using GiggleBook.Services.Instrumentation;
+
+namespace GiggleBook.Services;
+
+public class ServicesModule : Module
+{
+    protected override void Load(ContainerBuilder builder)
+    {
+        base.Load(builder);
+
+        builder.RegisterType<UsersRepository>().AsSelf().AsImplementedInterfaces();
+        builder.RegisterType<PostsRepository>().AsSelf().AsImplementedInterfaces();
+
+        builder.RegisterType<AuthenticationManager>().AsSelf().AsImplementedInterfaces();
+
+        builder.RegisterType<ReplicationRoutingDataSource>().AsSelf().AsImplementedInterfaces();
+
+        builder.RegisterType<RepositoryServiceInstrumentation>().AsSelf().SingleInstance();
+    }
+}

@@ -1,3 +1,6 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:eb1912465774b66c10e0efbe7b7e9a95b7e9952c2d86fafc9f2ed3ee17f4181b
-size 133
+@GiggleBook_HostAddress = http://localhost:5231
+
+GET {{GiggleBook_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

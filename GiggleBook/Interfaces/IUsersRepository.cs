@@ -1,3 +1,11 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:5afd7dfd87ae7b550d0b7401e417865f841e14e6b3b09b4549033f487de1ef30
-size 318
+﻿using GiggleBook.Dto;
+
+namespace GiggleBook.Interfaces;
+
+public interface IUsersRepository
+{
+    Task<User> AuthUserAsync(string name, string token);
+    Task<User> RegisterUserAsync(User user, string password);
+    Task<User> GetUserAsync(string id);
+    UserDto[] FindUser(string firstName, string secondName);
+}

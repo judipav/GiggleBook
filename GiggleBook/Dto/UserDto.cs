@@ -1,3 +1,13 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:8a77f182cb2b797f3e31bf58e115c9b2886d797b41ca36855bc40eec8f2eaa20
-size 389
+﻿namespace GiggleBook.Dto;
+
+public class UserDto
+{
+    public Guid Id { get; set; }
+    public string? UserName { get; set; }
+    public string? FirstName { get; set; }
+    public string? SecondName { get; set; }
+    public DateTime? BirthDate { get; set; }
+    public string? Biography { get; set; }
+    public string? City { get; set; }
+    public char? Sex { get; set; }
+}

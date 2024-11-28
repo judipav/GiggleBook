@@ -1,3 +1,12 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:01b341b3d5559bbf131bbe451f6c7fd77ac14dee748d0a1164f230063b59526a
-size 360
+using GiggleBook.Dto;
+
+namespace GiggleBook.Interfaces;
+
+public interface IPostsRepository {
+    Task<Post> GetAsync(Guid id);
+    Task<IEnumerable<Post>> GetUserPosts(Guid userId);
+    Task<Post> AddAsync(Post post);
+    Task<Post> UpdateAsync(Guid postId, string text);
+    Task DeleteAsync(Guid id);
+    Task<IEnumerable<Post>> GetFeedAsync(Guid userId);
+ }

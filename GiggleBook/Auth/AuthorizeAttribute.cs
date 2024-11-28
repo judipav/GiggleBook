@@ -1,3 +1,26 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:66d0a96414be6b3b702df79ec39754d86c0e77be15cc77fc9f86cc3d1b3a182e
-size 732
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
+
+namespace GiggleBook.Auth;
+
+public class AuthorizeAttribute : Attribute, IAuthorizationFilter
+{
+    public AuthorizeAttribute()
+    {
+        
+    }
+
+    public void OnAuthorization(AuthorizationFilterContext context)
+    {
+        if (context.ActionDescriptor.EndpointMetadata.OfType<AllowAnonymousAttribute>().Any())
+            return;
+
+        var user = context.HttpContext.User;
+        
+        if (user == null || user.Identity?.IsAuthenticated == false)
+        {
+            context.Result = new JsonResult(new { message = "Unauthorized" })
+            { StatusCode = StatusCodes.Status401Unauthorized };
+        }
+    }
+}

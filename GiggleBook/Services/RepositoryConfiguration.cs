@@ -1,3 +1,18 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:201aa8b347857a8958a492ea86266838dc54639f1d883718a97461aded5207ab
-size 577
+﻿namespace GiggleBook.Services;
+
+public class RepositoryConfiguration
+{
+    public const string PathConfiguration = "Postgres";
+    public bool Cqrs { get; set; }
+    public PostgresConfig Write { get; set; } = default!;
+    public PostgresConfig[] Readonly { get; set; } = default!;
+}
+
+public class PostgresConfig
+{
+    public required string Host {  get; set; }
+    public required string Port { get; set; }
+    public required string Database {  get; set; }
+    public required string User { get; set; }
+    public required string Password { get; set; }
+}
