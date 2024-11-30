@@ -72,7 +72,7 @@ var currentAssemblyXmlDoc = Path.Combine(
     );
 
 builder.Services.Configure<RepositoryConfiguration>(builder.Configuration.GetSection(RepositoryConfiguration.PathConfiguration));
-builder.Services.AddSingleton<IUsersRepository, UsersRepository>();
+builder.Services.Configure<RedisConfig>(builder.Configuration.GetSection(RedisConfig.PathConfiguration));
 
 builder.Services.AddHostedService<FillDbHostedService>();
 
@@ -105,6 +105,12 @@ builder.Services.AddOpenTelemetry()
     });
 
 var app = builder.Build();
+
+app.Lifetime.ApplicationStarted.Register(async () => {
+    using var scope = app.Services.CreateScope();
+    var postService = scope.ServiceProvider.GetRequiredService<PostService>();
+    await postService.CacheMostActiveUsersAsync(CancellationToken.None);
+});
 
 app.UseExceptionHandler(e =>
 {

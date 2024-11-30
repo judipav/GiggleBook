@@ -17,24 +17,24 @@ public class PostController : ControllerBase
     }
 
     [HttpPost("create")]
-    public IActionResult Create([FromBody] Post post) => Ok(_postsRepository.AddAsync(post));
+    public IActionResult Create([FromBody] Post post, CancellationToken token) => Ok(_postsRepository.AddAsync(post, token));
 
     [HttpPut("update")]
-    public IActionResult Update([FromBody] Post post) => Ok(_postsRepository.UpdateAsync(post.Id, post.Text));
+    public IActionResult Update([FromBody] Post post, CancellationToken token) => Ok(_postsRepository.UpdateAsync(post.Id, post.Text, token));
 
     [HttpPut("delete/{id}")]
-    public async Task<IActionResult> Delete(Guid id) 
+    public async Task<IActionResult> Delete(Guid id, CancellationToken token) 
     {
-        await _postsRepository.DeleteAsync(id);
+        await _postsRepository.DeleteAsync(id, token);
         return Ok();
     } 
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> Get(Guid id) => Ok(await _postsRepository.GetAsync(id));
+    public async Task<IActionResult> Get(Guid id, CancellationToken token) => Ok(await _postsRepository.GetAsync(id, token));
 
     [HttpGet("user/{id}")]
-    public async Task<IActionResult> UserPosts(Guid userId) => Ok( await _postsRepository.GetUserPosts(userId));
+    public async Task<IActionResult> UserPosts(Guid userId, CancellationToken token) => Ok( await _postsRepository.GetUserPosts(userId, token));
 
     [HttpGet("feed/{id}")]
-    public async Task<IActionResult> Feed(Guid id) => Ok(await _postsRepository.GetFeedAsync(id));
+    public IAsyncEnumerable<Post> Feed(Guid id, CancellationToken token) => _postsRepository.GetFeedAsync(id, token);
 }

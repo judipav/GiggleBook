@@ -412,7 +412,7 @@ ALTER FUNCTION public.post_delete(post_id uuid) OWNER TO postgres;
 -- Name: post_feed(uuid); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
-CREATE OR REPLACE FUNCTION public.post_feed(r_user_id uuid) RETURNS SETOF public."Post" LANGUAGE 'plpgsql' COST 100 VOLATILE PARALLEL UNSAFE ROWS 1000
+CREATE FUNCTION public.post_feed(r_user_id uuid) RETURNS SETOF public."Post" LANGUAGE 'plpgsql' COST 100 VOLATILE PARALLEL UNSAFE ROWS 1000
 AS $BODY$
 begin
 	RETURN QUERY 
@@ -426,6 +426,35 @@ $BODY$;
 
 ALTER FUNCTION public.post_feed(uuid)
     OWNER TO postgres;
+
+
+CREATE FUNCTION public.post_feed_except(
+	r_user_id uuid,
+	excluded_post_guids uuid[],
+	lim integer DEFAULT 100)
+    RETURNS SETOF "Post" 
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE PARALLEL UNSAFE
+    ROWS 1000
+
+AS $BODY$
+BEGIN
+    RETURN QUERY 
+	    SELECT p.id, p.text, p.author_user_id, p.created_at, p.updated_at
+	    FROM public."Post" p
+	    LEFT JOIN public."Friends" f ON f.user_id = r_user_id
+	    WHERE (p.author_user_id = f.friend_id OR p.author_user_id = r_user_id)
+	    AND p.id != ALL(excluded_post_guids) 
+	    LIMIT lim;
+END;
+$BODY$;
+
+ALTER FUNCTION public.post_feed_except(uuid, uuid[], integer)
+    OWNER TO postgres;
+
+
+
 --
 -- Name: post_get(uuid); Type: FUNCTION; Schema: public; Owner: postgres
 --
@@ -577,6 +606,30 @@ ALTER FUNCTION public.send_message(from_uid uuid, to_uid uuid, msg character var
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
+
+
+CREATE FUNCTION public.most_active(
+	)
+    RETURNS SETOF uuid 
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE PARALLEL UNSAFE
+    ROWS 1000
+
+AS $BODY$
+begin
+	RETURN QUERY SELECT ma.user_id from 
+	(SELECT f.user_id, COUNT(p.id) AS post_count
+FROM public."Friends" f
+LEFT JOIN public."Post" p ON f.friend_id = p.author_user_id
+GROUP BY f.user_id
+ORDER BY post_count DESC
+LIMIT 100) ma;
+end;
+$BODY$;
+
+ALTER FUNCTION public.most_active() OWNER TO postgres;
+
 
 
 --

@@ -30,3 +30,5 @@ sleep 5
 docker cp ./GiggleBook/Initialize/. master:/var/lib/postgresql/restore/
 docker exec -it master bash -c "chown -R postgres:postgres /var/lib/postgresql/restore/*"
 docker exec -it master su - postgres -c "psql -U postgres -f /var/lib/postgresql/restore/restore.sql"
+
+docker-compose -f docker-compose-redis.yml up -d
