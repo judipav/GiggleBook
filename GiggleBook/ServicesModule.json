@@ -1,5 +1,5 @@
 {
     "Redis": {
-      "ConnectionString": "gb-redis:6379"
+      "ConnectionString": "gb_redis:6379"
     }
 }

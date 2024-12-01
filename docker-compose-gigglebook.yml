@@ -7,6 +7,10 @@ services:
     container_name: GiggleBook
     ports:
       - 5090:8080
+    volumes:
+      - ./GiggleBook/appsettings.Production.json:/app/publish/appsettings.Production.json
+      - ./GiggleBook/appsettings.json:/app/publish/appsettings.json
+      - ./GiggleBook/ServicesModule.json:/app/publish/ServicesModule.json
     networks:
       - hw03
 

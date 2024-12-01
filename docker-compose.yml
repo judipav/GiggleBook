@@ -1,20 +1,4 @@
 services:
-  gigglebook:
-    image: ${DOCKER_REGISTRY-}gigglebook
-    build:
-      context: .
-      dockerfile: GiggleBook/Dockerfile
-    container_name: GiggleBook
-    ports:
-      - 5090:8080
-    volumes:
-      - ./GiggleBook/appsettings.Production.json:/app/publish/appsettings.Production.json
-      - ./GiggleBook/appsettings.json:/app/publish/appsettings.json
-    depends_on:
-      - "master"
-    networks:
-      - hw03
-
   master:
     image: postgres:15
     restart: unless-stopped

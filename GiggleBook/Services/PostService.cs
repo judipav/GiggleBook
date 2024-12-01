@@ -38,10 +38,12 @@ public class PostService : IPostsRepository
         ]);
         
         await _redis.StringSetAsync($"{post.Id}:rating", 0);
+        await _redis.ListLeftPushAsync($"timeline:{post.AuthorId}", post.Id.ToString()); //формируем фид постов друзей при добавлении нового поста
+        await _redis.ListTrimAsync($"timeline:{post.AuthorId}", 0, MAX_POSTS - 1); // сносим последний пост
 
-        var friends = (await GetFriends(post.AuthorId, token)).ToList();
-        friends.Add(post.AuthorId);
-        foreach (var friend in friends)
+        var friends = GetSubscribers(post.AuthorId, token);
+        
+        await foreach (var friend in friends)
         {
             await _redis.ListLeftPushAsync($"timeline:{friend}", post.Id.ToString()); //формируем фид постов друзей при добавлении нового поста
             await _redis.ListTrimAsync($"timeline:{friend}", 0, MAX_POSTS - 1); // сносим последний пост
@@ -102,7 +104,7 @@ public class PostService : IPostsRepository
 
         foreach (var postId in postIds)
         {
-            await _redis.StringIncrementAsync($"{postId}:rating");
+            //await _redis.StringIncrementAsync($"{postId}:rating");
 
             var postData = await _redis.HashGetAllAsync($"post:{postId}");
             if (postData.Length > 0)
@@ -193,29 +195,18 @@ public class PostService : IPostsRepository
         }
     }
 
-    public async Task<IEnumerable<Post>> GetUserPosts(Guid userId, CancellationToken token)
+    public async IAsyncEnumerable<Post> GetUserPosts(Guid userId, [EnumeratorCancellation] CancellationToken token)
     {
         using var connection = _dataSource.GetConnection(ConnectionType.Readonly);
         using var command = connection.CreateCommand();
         command.CommandType = CommandType.Text;
         command.CommandText = "select * from post_get_all(:postId)";
         command.Parameters.Add(new NpgsqlParameter("postId", NpgsqlTypes.NpgsqlDbType.Uuid)).Value = userId;
+        var response = await command.ExecuteReaderAsync(token);             
 
-        try
+        while (response.Read())
         {
-            var response = await command.ExecuteReaderAsync(token);
-            List<Post> posts = new();              
-
-            while (response.Read())
-            {
-                posts.Add(new Post{ Id = response.GetGuid(0), Text = response.GetString(1), AuthorId = response.GetGuid(2), CreatedAt = response.GetDateTime(3), UpdatedAt = response.GetDateTime(4)});
-            }
-            
-            return posts;
-        }
-        catch (Exception ex)
-        {
-            throw new CommonServiceException(654, ex.Message);
+            yield return new Post{ Id = response.GetGuid(0), Text = response.GetString(1), AuthorId = response.GetGuid(2), CreatedAt = response.GetDateTime(3), UpdatedAt = response.GetDateTime(4)};
         }
     }
 
@@ -245,45 +236,33 @@ public class PostService : IPostsRepository
     
     public async Task CacheMostActiveUsersAsync(CancellationToken token)
     {
-        List<Guid> mostActiveUsers = (await MostActiveUsersAsync(token)).ToList();
-            Console.WriteLine("Начинаю обработку постов наиболее активных пользователей...\n");
+        IAsyncEnumerable<Guid> mostActiveUsers = MostActiveUsersAsync(token);
+        Console.WriteLine("Начинаю обработку постов наиболее активных пользователей...\n");
         
         // чтобы не затягивать прогрев кэша:
-        mostActiveUsers = mostActiveUsers[..5];
+        //mostActiveUsers = mostActiveUsers[..5];
 
         int userIndex = 1;
-        int totalUsers = mostActiveUsers.Count;
 
-        foreach (var item in mostActiveUsers)
+        await foreach (var item in mostActiveUsers)
         {
-            var posts = (await GetUserPosts(item, token)).ToList();
-
             Console.ForegroundColor = ConsoleColor.Green; 
-            Console.WriteLine($"[{userIndex}/{totalUsers}] Обрабатываю посты пользователя: {item} ({posts.Count()} постов найдено)");
+            Console.WriteLine($"[{userIndex}] Обрабатываю посты пользователя: {item}");
             Console.ResetColor();
 
-            foreach(var post in posts) {
+            await foreach(var post in GetUserPosts(item, token)) 
                 await AddCacheAsync(post, token);
-            } 
 
-            var friends = await GetFriends(item, token); //тянем френдов и их посты тоже кэшируем
-            int friendIndex = 1;
-            foreach (var friend in friends)
-            {
-                var friendPosts = (await GetUserPosts(friend, token)).ToList();
-                Console.WriteLine($"[{friendIndex}/{friends.Count()}] Обрабатываю посты пользователя: {friend} ({friendPosts.Count()} постов найдено)");
-                foreach(var friendPost in friendPosts) 
-                {
+            //тянем подписки их посты формируют нашу ленту 
+            await foreach (var friend in GetFriends(item, token))
+                await foreach(var friendPost in GetUserPosts(friend, token)) 
                     await AddCacheAsync(friendPost, token);
-                } 
-                friendIndex++;
-            }
-            
+                
             userIndex++;
         }
     }
 
-    private async Task<IEnumerable<Guid>> MostActiveUsersAsync(CancellationToken token)
+    private async IAsyncEnumerable<Guid> MostActiveUsersAsync([EnumeratorCancellation] CancellationToken token)
     {
         List<Guid> mostActiveUsers = new ();
         using var connection = _dataSource.GetConnection(ConnectionType.Readonly);
@@ -291,42 +270,42 @@ public class PostService : IPostsRepository
         command.CommandType = CommandType.Text;
         command.CommandText = "SELECT * FROM most_active()";
 
-        try
+        var reader = await command.ExecuteReaderAsync(token);
+        while (reader.Read())
         {
-            var reader = await command.ExecuteReaderAsync(token);
-            while (reader.Read())
-            {
-                mostActiveUsers.Add(reader.GetGuid(0));
-            }
-            return mostActiveUsers;
-        }
-        catch (Exception ex)
-        {
-            throw new CommonServiceException(768, $"Ошибка при прогреве кэша {ex.Message}");
+            yield return reader.GetGuid(0);
         }
     }
 
-    private async Task<IEnumerable<Guid>> GetFriends(Guid userId, CancellationToken token)
+    private async IAsyncEnumerable<Guid> GetFriends(Guid userId, [EnumeratorCancellation] CancellationToken token)
     {
         List<Guid> friends = new ();
         using var connection = _dataSource.GetConnection(ConnectionType.Readonly);
         using var command = connection.CreateCommand();
         command.CommandType = CommandType.Text;
-        command.CommandText = "SELECT * FROM get_friends(:user_id)";
+        command.CommandText = "SELECT * FROM public.get_friends(:user_id)";
         command.Parameters.Add(new NpgsqlParameter("user_id", NpgsqlTypes.NpgsqlDbType.Uuid)).Value = userId;
 
-        try
+        var reader = await command.ExecuteReaderAsync(token);
+        while (await reader.ReadAsync(token))
         {
-            var reader = await command.ExecuteReaderAsync(token);
-            while (reader.Read())
-            {
-                friends.Add(reader.GetGuid(0));
-            }
-            return friends;
+            yield return reader.GetGuid(0);
         }
-        catch (Exception ex)
+    }
+
+        private async IAsyncEnumerable<Guid> GetSubscribers(Guid userId, [EnumeratorCancellation] CancellationToken token)
+    {
+        List<Guid> friends = new ();
+        using var connection = _dataSource.GetConnection(ConnectionType.Readonly);
+        using var command = connection.CreateCommand();
+        command.CommandType = CommandType.Text;
+        command.CommandText = "SELECT * FROM public.get_subscribers(:user_id)";
+        command.Parameters.Add(new NpgsqlParameter("user_id", NpgsqlTypes.NpgsqlDbType.Uuid)).Value = userId;
+
+        var reader = await command.ExecuteReaderAsync(token);
+        while (await reader.ReadAsync(token))
         {
-            throw new CommonServiceException(768, $"Ошибка при прогреве кэша {ex.Message}");
+            yield return reader.GetGuid(0);
         }
     }
 

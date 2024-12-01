@@ -4,7 +4,7 @@ namespace GiggleBook.Interfaces;
 
 public interface IPostsRepository {
     Task<Post> GetAsync(Guid id, CancellationToken token);
-    Task<IEnumerable<Post>> GetUserPosts(Guid userId, CancellationToken token);
+    IAsyncEnumerable<Post> GetUserPosts(Guid userId, CancellationToken token);
     Task AddAsync(Post post, CancellationToken token);
     Task<Post> UpdateAsync(Guid postId, string text, CancellationToken token);
     Task DeleteAsync(Guid id, CancellationToken token);

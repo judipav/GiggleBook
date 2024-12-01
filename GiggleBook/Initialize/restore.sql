@@ -432,7 +432,7 @@ CREATE FUNCTION public.post_feed_except(
 	r_user_id uuid,
 	excluded_post_guids uuid[],
 	lim integer DEFAULT 100)
-    RETURNS SETOF "Post" 
+    RETURNS SETOF public."Post" 
     LANGUAGE 'plpgsql'
     COST 100
     VOLATILE PARALLEL UNSAFE
@@ -502,10 +502,50 @@ BEGIN
 END;
 $BODY$;
 
-
-
 ALTER FUNCTION public.post_update(post_id uuid, post_text text) OWNER TO postgres;
 
+--
+-- TOC entry 222 (class 1255 OID 16529)
+-- Name: get_friends(uuid); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION public.get_friends(current_user_id uuid) RETURNS SETOF uuid
+    LANGUAGE plpgsql
+    AS $$
+
+begin
+	RETURN QUERY 
+		SELECT friend_id from public."Friends" where user_id = current_user_id;
+end;
+$$;
+
+
+ALTER FUNCTION public.get_friends(current_user_id uuid) OWNER TO postgres;
+
+
+CREATE OR REPLACE FUNCTION public.get_subscribers(
+	current_user_id uuid)
+    RETURNS SETOF uuid 
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE PARALLEL UNSAFE
+    ROWS 1000
+
+AS $BODY$
+
+begin
+	RETURN QUERY 
+		SELECT user_id from public."Friends" where friend_id = current_user_id;
+end;
+$BODY$;
+
+ALTER FUNCTION public.get_subscribers(uuid)
+    OWNER TO postgres;
+
+--
+-- TOC entry 243 (class 1255 OID 16463)
+-- Name: post_get_all(uuid); Type: FUNCTION; Schema: public; Owner: postgres
+--
 
 CREATE OR REPLACE FUNCTION public.post_get_all(user_id uuid) RETURNS SETOF public."Post" LANGUAGE 'plpgsql'
     COST 100

@@ -33,7 +33,7 @@ public class PostController : ControllerBase
     public async Task<IActionResult> Get(Guid id, CancellationToken token) => Ok(await _postsRepository.GetAsync(id, token));
 
     [HttpGet("user/{id}")]
-    public async Task<IActionResult> UserPosts(Guid userId, CancellationToken token) => Ok( await _postsRepository.GetUserPosts(userId, token));
+    public IAsyncEnumerable<Post> UserPosts(Guid userId, CancellationToken token) => _postsRepository.GetUserPosts(userId, token);
 
     [HttpGet("feed/{id}")]
     public IAsyncEnumerable<Post> Feed(Guid id, CancellationToken token) => _postsRepository.GetFeedAsync(id, token);
