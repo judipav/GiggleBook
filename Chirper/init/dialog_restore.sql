@@ -11,6 +11,9 @@ SET row_security = off;
 
 \connect postgres
 
+CREATE EXTENSION IF NOT EXISTS citus;
+
+
 CREATE TABLE IF NOT EXISTS public."DialogMessage"
 (
     "from" uuid NOT NULL,
@@ -31,7 +34,7 @@ DECLARE
     worker_count INT;
 BEGIN
     LOOP
-        SELECT COUNT(*) INTO worker_count FROM citus_get_active_worker_nodes();
+        SELECT COUNT(*) INTO worker_count FROM pg_catalog.citus_get_active_worker_nodes();
 
         IF worker_count > 0 THEN
             EXIT;  
@@ -100,10 +103,11 @@ ALTER FUNCTION public.send_message(uuid, uuid, character varying)
 
 CREATE TABLE public.isolated_tenants (
     tenant_id UUID PRIMARY KEY,
+    shard_id BIGINT NOT NULL,
     isolated_at TIMESTAMP DEFAULT NOW()
 );
 
-CREATE OR REPLACE VIEW public.chatty_tenants AS
+CREATE VIEW public.chatty_tenants AS
 WITH message_counts AS (
     SELECT 
         "DialogMessage"."from" AS tenant_id,
@@ -135,38 +139,59 @@ LIMIT 10;
 ALTER TABLE public.chatty_tenants
     OWNER TO postgres;
 
-CREATE FUNCTION public.isolate_chatty_tenant(
-    tenant_id UUID,
-    dest_host TEXT,
-    dest_port INT
-) RETURNS VOID AS $$
+CREATE FUNCTION public.isolate_chatty_tenant(tenant_id UUID)
+RETURNS void
+LANGUAGE 'plpgsql'
+COST 100
+VOLATILE PARALLEL UNSAFE
+
+as $$
 DECLARE
     new_shard_id BIGINT;
+begin
+	new_shard_id := isolate_tenant_to_new_shard('public."DialogMessage"', tenant_id, shard_transfer_mode => 'force_logical');
 
-BEGIN
-    new_shard_id := isolate_tenant_to_new_shard('public."DialogMessage"', tenant_id, shard_transfer_mode => 'force_logical');
+    INSERT INTO public.isolated_tenants (tenant_id, shard_id) VALUES (tenant_id, new_shard_id);
+END $$;
 
-    WITH si AS (
-        SELECT nodename, nodeport
-        FROM pg_dist_placement AS placement
-        JOIN pg_dist_node AS node ON placement.groupid = node.groupid
-        WHERE node.noderole = 'primary'
-          AND shardid = new_shard_id
-    )
 
-    SELECT citus_move_shard_placement(
-        new_shard_id,
-        si.nodename, si.nodeport,
-        dest_host, dest_port,
-        shard_transfer_mode => 'force_logical'
-    )
-    FROM si;  
-    INSERT INTO public.isolated_tenants (tenant_id) VALUES (tenant_id);  
+ALTER FUNCTION public.isolate_chatty_tenant(uuid, text, integer)
+    OWNER TO postgres;
 
-EXCEPTION
-    WHEN OTHERS THEN
-        RAISE NOTICE 'Ошибка: %', SQLERRM;
-END;
-$$ LANGUAGE plpgsql;
 
-ALTER FUNCTION public.isolate_chatty_tenant(uuid, TEXT, int) OWNER TO postgres;
+CREATE FUNCTION public.move_isolated_tenant(
+    shard_id BIGINT,
+    dest_host TEXT,
+    dest_port INTEGER
+)
+RETURNS void
+LANGUAGE 'plpgsql'
+COST 100
+VOLATILE PARALLEL UNSAFE
+
+AS $$
+DECLARE
+	src_host TEXT; 
+    src_port INTEGER;
+begin
+	SELECT nodename, nodeport
+	INTO src_host, src_port
+	FROM pg_dist_placement AS placement
+	JOIN pg_dist_node AS node ON placement.groupid = node.groupid
+	WHERE node.noderole = 'primary'
+	  AND shardid = shard_id;
+	RAISE NOTICE 'Размещение шарда: % %', src_host, src_port;
+	
+	PERFORM citus_move_shard_placement(
+		shard_id,
+		src_host, 
+		src_port,
+		dest_host, 
+		dest_port,
+		shard_transfer_mode => 'block_writes'
+	);
+END $$;
+
+
+ALTER FUNCTION public.move_isolated_tenant(BIGINT, text, integer)
+    OWNER TO postgres;
