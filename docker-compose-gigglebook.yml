@@ -13,6 +13,34 @@ services:
       - ./GiggleBook/ServicesModule.json:/app/publish/ServicesModule.json
     networks:
       - hw03
+  
+  chirper:
+    image: ${DOCKER_REGISTRY-}chirper
+    build:
+      context: .
+      dockerfile: Chirper/dockerfile
+    container_name: Chirper
+    ports:
+      - 5080:8080
+    volumes:
+      - ./Chirper/appsettings.Production.json:/app/publish/appsettings.Production.json
+      - ./Chirper/appsettings.json:/app/publish/appsettings.json
+    networks:
+      - hw03
+
+  authorization:
+    image: ${DOCKER_REGISTRY-}authorization
+    build:
+      context: .
+      dockerfile: Authorization/dockerfile
+    container_name: Authorization
+    ports:
+      - 5070:8080
+    volumes:
+      - ./Authorization/appsettings.Production.json:/app/publish/appsettings.Production.json
+      - ./Authorization/appsettings.json:/app/publish/appsettings.json
+    networks:
+      - hw03
 
 networks:
   hw03:

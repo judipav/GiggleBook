@@ -4,6 +4,5 @@ namespace GiggleBook.Auth;
 
 public interface IAuthenticationManager 
 {
-    Task<User> ValidateCredentials(string username, string password);
-    //User ValidatePrincipal(string token);
+    Task<User> AuthenticateAsync(string username, string password, HttpContext httpContext);
 }

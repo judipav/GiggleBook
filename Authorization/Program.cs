@@ -1,10 +1,9 @@
+using System.Reflection;
+using System.Text;
+using Authorization.Services;
+using Authorization.Services.ServiceException;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
-using GiggleBook.Auth;
-using GiggleBook.Initialize;
-using GiggleBook.Services;
-using GiggleBook.Services.Instrumentation;
-using GiggleBook.Services.ServiceException;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics;
@@ -12,13 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Hosting.Systemd;
 using Microsoft.Extensions.Hosting.WindowsServices;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
 using Npgsql;
-using OpenTelemetry.Metrics;
-using OpenTelemetry.Resources;
-using OpenTelemetry.Trace;
-using System.Reflection;
-using System.Text;
 
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions
 {
@@ -57,15 +50,35 @@ builder.Services
         options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
     });
 
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie();
+builder.Services.AddEndpointsApiExplorer();
+
+builder.Services.AddSwaggerGen(swagger => {
+    swagger.AddSecurityDefinition("Jwt", new Microsoft.OpenApi.Models.OpenApiSecurityScheme {
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Name = "Authorization",
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+});
 
 builder.Services
-    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options => {
+        options.ExpireTimeSpan = TimeSpan.FromHours(1);
+        options.SlidingExpiration = true;
+        options.Cookie.Name = "GiggleBookAuth";
+    });
+
+builder.Services
+    .AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
     .AddJwtBearer(options => {
         options.TokenValidationParameters = new TokenValidationParameters{
-            ValidateIssuer = true,
-            ValidateAudience = true,
+            ValidateIssuer = false,
+            ValidateAudience = false,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
             ValidIssuer = builder.Configuration["Jwt:Issuer"],
@@ -74,55 +87,28 @@ builder.Services
         };
     });
 
-builder.Services.AddDateOnlyTimeOnlyStringConverters();
-
-builder.Services.AddEndpointsApiExplorer();
-
 builder.Services.Configure<RepositoryConfiguration>(builder.Configuration.GetSection(RepositoryConfiguration.PathConfiguration));
-builder.Services.Configure<RedisConfig>(builder.Configuration.GetSection(RedisConfig.PathConfiguration));
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection(JwtSettings.PathConfiguration));
 
-builder.Services.AddHostedService<FillDbHostedService>();
-
-var currentAssemblyXmlDoc = Path.Combine(
-        Path.GetDirectoryName(AppContext.BaseDirectory) ?? throw new Exception("Отсутствует файл документации"),
-        $"{Assembly.GetExecutingAssembly().GetName().Name}.xml"
-    );
-
-builder.Services.AddSwaggerGen(swagger => {
-    swagger.IncludeXmlComments(currentAssemblyXmlDoc);
-    swagger.UseInlineDefinitionsForEnums();
-    swagger.CustomSchemaIds(i => i.ToString());
-
-    swagger.AddSecurityDefinition("cookieAuth", new OpenApiSecurityScheme
-    {
-        In = ParameterLocation.Cookie,
-        Name = "GiggleBookAuth", // Укажите имя вашего куки
-        Type = SecuritySchemeType.Http,
-        Scheme = "cookie"
-    });
+var allowedOrigins = new List<string>();
+for (int port = 5000; port <= 5900; port++)
+{
+    allowedOrigins.Add($"http://localhost:{port}");
+    allowedOrigins.Add($"https://localhost:{port}");
+}
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowLocalhost",
+        builder =>
+        {
+            builder.WithOrigins(allowedOrigins.ToArray()) 
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials(); 
+        });
 });
-
-builder.Services.AddOpenTelemetry()
-    .ConfigureResource(r => r
-    .AddService(serviceName: "RepositoryService",
-    serviceInstanceId: Environment.MachineName))
-    .WithTracing(builder => {
-        builder.AddSource(RepositoryServiceInstrumentation.ActivitySourceName)
-            .SetSampler(new AlwaysOnSampler());
-    })
-    .WithMetrics(builder => {
-        builder.AddMeter(RepositoryServiceInstrumentation.MeterName);
-        builder.AddPrometheusExporter();
-    });
 
 var app = builder.Build();
-
-app.Lifetime.ApplicationStarted.Register(async () => {
-    using var scope = app.Services.CreateScope();
-    var postService = scope.ServiceProvider.GetRequiredService<PostService>();
-    await postService.CacheMostActiveUsersAsync(CancellationToken.None);
-});
 
 app.Use(async (context, next) =>
 {
@@ -181,10 +167,11 @@ app.UseExceptionHandler(e =>
         }
     });
 });
-app.UseOpenTelemetryPrometheusScrapingEndpoint();
+
 app.UseSwagger();
 app.UseSwaggerUI();
 
+app.UseCors("AllowLocalhost");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

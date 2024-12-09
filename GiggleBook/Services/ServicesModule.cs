@@ -1,5 +1,4 @@
 ﻿using Autofac;
-using Autofac.Core.Lifetime;
 using GiggleBook.Auth;
 using GiggleBook.Services.Instrumentation;
 using GiggleBook.Services.ServiceException;

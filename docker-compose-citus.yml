@@ -1,0 +1,63 @@
+services:
+  citus-master:
+    container_name: "citus-master"
+    hostname: citus-master
+    build:
+      context: .
+      dockerfile: gb-citus
+    ports:
+      - "54320:5432"
+    labels: ["com.citusdata.role=Master"]
+    environment: &AUTH
+      POSTGRES_USER: "${POSTGRES_USER:-postgres}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+      PGUSER: "${POSTGRES_USER:-postgres}"
+      PGPASSWORD: "${POSTGRES_PASSWORD}"
+      POSTGRES_HOST_AUTH_METHOD: "${POSTGRES_HOST_AUTH_METHOD:-trust}"
+    volumes:
+      - ./turn_on_wal_level_logical.sh:/docker-entrypoint-initdb.d/turn_on_wal_level_logical.sh
+    networks:
+      - hw03
+
+
+  citus-worker:
+    build:
+      context: .
+      dockerfile: gb-citus-worker
+    labels: ["com.citusdata.role=Worker"]
+    depends_on: [manager]
+    environment:
+      POSTGRES_USER: "${POSTGRES_USER:-postgres}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+      PGUSER: "${POSTGRES_USER:-postgres}"
+      PGPASSWORD: "${POSTGRES_PASSWORD}"
+      POSTGRES_HOST_AUTH_METHOD: "${POSTGRES_HOST_AUTH_METHOD:-trust}"
+    command: "/wait-for-manager.sh"  
+    volumes:
+      - ./turn_on_wal_level_logical.sh:/docker-entrypoint-initdb.d/turn_on_wal_level_logical.sh
+      - healthcheck-volume:/healthcheck
+    networks:
+      - hw03
+
+  manager:
+    container_name: "citus-manager"
+    image: "citusdata/membership-manager:0.3.0"
+    volumes:
+      - "${DOCKER_SOCK:-/var/run/docker.sock}:/var/run/docker.sock"
+      - healthcheck-volume:/healthcheck
+    depends_on: [citus-master]
+    environment:
+      <<: *AUTH
+      CITUS_HOST: "citus-master"
+    networks:
+      - hw03
+
+volumes:
+  healthcheck-volume:
+
+networks:
+  hw03:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.32.0.0/16

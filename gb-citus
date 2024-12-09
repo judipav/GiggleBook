@@ -1,0 +1,12 @@
+FROM citusdata/citus:12.1.6
+RUN apt-get install --reinstall --purge locales && apt-get update && apt-get install -y locales-all && locale-gen ru_RU.UTF-8 && update-locale LANG=ru_RU.UTF-8 && apt-get install -y procps cron && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+ENV LANG=ru_RU.UTF-8  
+ENV LC_ALL=ru_RU.UTF-8
+
+COPY call_check_and_redistribute.sh /usr/local/bin/call_check_and_redistribute.sh
+RUN chmod +x /usr/local/bin/call_check_and_redistribute.sh
+RUN chown postgres:postgres /usr/local/bin/call_check_and_redistribute.sh
+
+COPY crontab /etc/cron.d/redistribute_cron
+RUN chmod 0644 /etc/cron.d/redistribute_cron && chown postgres:postgres /etc/cron.d/redistribute_cron && crontab -u postgres /etc/cron.d/redistribute_cron

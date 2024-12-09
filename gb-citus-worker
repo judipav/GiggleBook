@@ -1,0 +1,6 @@
+FROM citusdata/citus:12.1.6
+
+RUN apt-get install --reinstall --purge locales && apt-get update && apt-get install -y locales-all && locale-gen ru_RU.UTF-8 && update-locale LANG=ru_RU.UTF-8
+
+ENV LANG ru_RU.UTF-8
+ENV LC_ALL ru_RU.UTF-8

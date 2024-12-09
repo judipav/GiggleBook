@@ -26,10 +26,16 @@ echo "\nsynchronous_commit = on" >> ./DbCluster/Volumes/master_postgresql.conf
 echo "\nsynchronous_standby_names = 'ANY 1 (slave1, slave2)'" >> ./DbCluster/Volumes/master_postgresql.conf
 
 docker start master
-sleep 5
+sleep 3
 docker cp ./GiggleBook/Initialize/. master:/var/lib/postgresql/restore/
 docker exec -it master bash -c "chown -R postgres:postgres /var/lib/postgresql/restore/*"
 docker exec -it master su - postgres -c "psql -U postgres -f /var/lib/postgresql/restore/restore.sql"
+
+POSTGRES_PASSWORD='pass' docker-compose -f docker-compose-citus.yml up --scale citus-worker=2 -d
+sleep 10
+docker cp ./Chirper/init/. citus-master:/var/lib/postgresql/restore/
+docker exec -it citus-master bash -c "chown -R postgres:postgres /var/lib/postgresql/restore/*"
+docker exec -it citus-master su - postgres -c "psql -U postgres -f /var/lib/postgresql/restore/dialog_restore.sql"
 
 docker-compose -f docker-compose-redis.yml up -d
 docker-compose -f docker-compose-gigglebook.yml up -d

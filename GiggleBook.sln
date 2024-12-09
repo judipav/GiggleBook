@@ -7,6 +7,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GiggleBook", "GiggleBook\Gi
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{DAB7E793-2897-47CE-9372-2D8734A5059A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Authorization", "Authorization\Authorization.csproj", "{15B9D369-F6BE-492B-B134-A1AF02BBE545}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chirper", "Chirper\Chirper.csproj", "{F619B530-E8C2-4D9D-AA7A-80364332761C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +25,14 @@ Global
 		{DAB7E793-2897-47CE-9372-2D8734A5059A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DAB7E793-2897-47CE-9372-2D8734A5059A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DAB7E793-2897-47CE-9372-2D8734A5059A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{15B9D369-F6BE-492B-B134-A1AF02BBE545}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{15B9D369-F6BE-492B-B134-A1AF02BBE545}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{15B9D369-F6BE-492B-B134-A1AF02BBE545}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{15B9D369-F6BE-492B-B134-A1AF02BBE545}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F619B530-E8C2-4D9D-AA7A-80364332761C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F619B530-E8C2-4D9D-AA7A-80364332761C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F619B530-E8C2-4D9D-AA7A-80364332761C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F619B530-E8C2-4D9D-AA7A-80364332761C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

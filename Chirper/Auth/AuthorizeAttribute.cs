@@ -1,7 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
-namespace GiggleBook.Auth;
+namespace Chirper.Auth;
 
 public class AuthorizeAttribute : Attribute, IAuthorizationFilter
 {

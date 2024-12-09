@@ -1,0 +1,26 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "C#: GiggleBook",
+            "type": "dotnet",
+            "request": "launch",
+            "projectPath": "${workspaceFolder}/GiggleBook/GiggleBook.csproj",
+            "launchConfigurationId": "TargetFramework=;http"
+        },
+        {
+            "name": "C#: Authorization",
+            "type": "dotnet",
+            "request": "launch",
+            "projectPath": "${workspaceFolder}/Authorization/Authorization.csproj",
+            "launchConfigurationId": "TargetFramework=;http"
+        },
+        {
+            "name": "C#: Chirper",
+            "type": "dotnet",
+            "request": "launch",
+            "projectPath": "${workspaceFolder}/Chirper/Chirper.csproj",
+            "launchConfigurationId": "TargetFramework=;http"
+        }
+    ]
+}
